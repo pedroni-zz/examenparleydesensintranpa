@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación Aplicada: Ley de los Senos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            color: #0f172a;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .font-mono-code {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .no-select {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        @keyframes pulseBorder {
+            0%, 100% { border-color: rgba(239, 68, 68, 0.9); }
+            50% { border-color: rgba(239, 68, 68, 0.3); }
+        }
+        .alert-pulse {
+            animation: pulseBorder 2s infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased selection:bg-indigo-100 selection:text-indigo-900">
+
+    <!-- Encabezado Superior -->
+    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-40 border-b border-slate-800">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-lg bg-indigo-600 flex items-center justify-center shadow-inner">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-sm sm:text-base font-bold tracking-tight leading-tight">Evaluación Aplicada: Ley de los Senos</h1>
+                    <p class="text-[11px] text-slate-400">Trigonometría Oblicuángula · 3 Reactivos Dinámicos</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-3">
+                <div id="network-badge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-950/80 text-emerald-300 border border-emerald-700/60">
+                    <span id="network-dot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <span id="network-text">En línea</span>
+                </div>
+                <div id="exam-status-badge" class="hidden items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-200 border border-slate-700">
+                    <span>Versión #<span id="header-version">1</span></span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Banner Rojo Persistente de Advertencia tras Infracción -->
+    <div id="infraction-banner" class="hidden bg-red-600 text-white px-4 py-2.5 text-xs sm:text-sm font-semibold shadow-md border-b border-red-700">
+        <div class="max-w-4xl mx-auto flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <span id="infraction-banner-text">Se detectó una salida de pantalla. El examen cambió a una nueva versión.</span>
+            </div>
+            <button type="button" id="btn-dismiss-banner" class="px-2.5 py-1 rounded-lg bg-red-800 hover:bg-red-900 text-xs font-bold shrink-0 cursor-pointer">
+                Cerrar
+            </button>
+        </div>
+    </div>
+
+    <!-- Overlay Bloqueante al Perder Conexión -->
+    <div id="offline-overlay" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 sm:p-7 shadow-2xl border-2 border-red-500 text-center space-y-4">
+            <div class="w-14 h-14 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto">
+                <svg class="w-8 h-8 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3"/>
+                </svg>
+            </div>
+            <div>
+                <span class="text-xs font-extrabold uppercase tracking-wider text-red-600">Desconexión Detectada</span>
+                <h3 class="text-xl font-extrabold text-slate-900 mt-1">Sin Conexión a Internet</h3>
+            </div>
+            <p class="text-sm text-slate-700 leading-relaxed">
+                Tu desconexión quedó registrada en la bitácora local, se regeneraron 3 ejercicios nuevos y los reportes pendientes se enviarán automáticamente al recuperar la red.
+            </p>
+            <div class="p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-900 font-medium">
+                Activa tus datos móviles o Wi-Fi para continuar y entregar tu evaluación.
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor Principal -->
+    <main class="flex-grow max-w-4xl w-full mx-auto px-4 py-6 sm:py-8">
+
+        <!-- ========================================================= -->
+        <!-- VISTA 1: REGISTRO E INSTRUCCIONES                         -->
+        <!-- ========================================================= -->
+        <section id="view-register" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 px-6 py-7 text-white">
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-200 border border-indigo-400/30 mb-3">
+                    Evaluación Institucional · Dominio @ugto.mx
+                </span>
+                <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Evaluación Aplicada: Ley de los Senos</h2>
+                <p class="mt-2 text-slate-300 text-sm sm:text-base max-w-2xl">
+                    Resuelve <strong>3 ejercicios aplicados</strong> seleccionados aleatoriamente sobre triángulos oblicuángulos. Calificación total sobre <strong>100 puntos</strong>.
+                </p>
+            </div>
+
+            <div class="p-6 sm:p-8 space-y-6">
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 sm:p-5">
+                    <h3 class="text-sm font-bold text-amber-900 uppercase tracking-wider flex items-center gap-2">
+                        <svg class="w-5 h-5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        Política de Supervisión y Regeneración Automática
+                    </h3>
+                    <ul class="mt-3 space-y-2 text-xs sm:text-sm text-amber-950">
+                        <li class="flex items-start gap-2">
+                            <span class="font-bold text-amber-700">1.</span>
+                            <span><strong>Salida de ventana o recarga:</strong> Si cambias de pestaña, minimizas el navegador o recargas durante el examen, se borran tus respuestas, se registra una infracción y se generan <strong>3 ejercicios completamente distintos</strong>.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="font-bold text-amber-700">2.</span>
+                            <span><strong>Desconexión de red:</strong> Si pierdes internet o apagas los datos, la pantalla se bloqueará, se registrará el incidente y se sincronizará con el docente al volver la señal.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="font-bold text-amber-700">3.</span>
+                            <span><strong>Sin revisión posterior:</strong> Al entregar obtendrás tu calificación sobre 100, tu sello criptográfico SHA-256 y la bitácora de incidencias, sin posibilidad de revisar preguntas o respuestas.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <form id="register-form" class="space-y-4" novalidate>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="student-name" class="block text-sm font-semibold text-slate-700 mb-1.5">
+                                Nombre completo <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="student-name" required placeholder="Ej. Diego Alejandro Hernández Pérez"
+                                class="w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                        </div>
+                        <div>
+                            <label for="student-email" class="block text-sm font-semibold text-slate-700 mb-1.5">
+                                Correo institucional (@ugto.mx) <span class="text-red-500">*</span>
+                            </label>
+                            <input type="email" id="student-email" required placeholder="estudiante@ugto.mx"
+                                class="w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                        </div>
+                    </div>
+
+                    <div id="register-error" class="hidden p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm font-medium"></div>
+
+                    <div class="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-slate-100">
+                        <p class="text-xs text-slate-500">
+                            Usa tu calculadora científica en modo <strong>DEG (Grados)</strong>. Se requiere correo <strong>@ugto.mx</strong>.
+                        </p>
+                        <button type="submit" id="btn-start-exam"
+                            class="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-bold text-sm shadow-md shadow-indigo-600/20 transition flex items-center justify-center gap-2 cursor-pointer">
+                            <span>Iniciar Evaluación</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- VISTA 2: EXAMEN ACTIVO (3 PARTES - LEY DE LOS SENOS)      -->
+        <!-- ========================================================= -->
+        <section id="view-exam" class="hidden space-y-6 no-select">
+            <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
+                        <h2 id="exam-student-display" class="font-bold text-slate-900 text-sm sm:text-base">Estudiante</h2>
+                    </div>
+                    <p id="exam-email-display" class="text-xs text-slate-500 ml-4.5">usuario@ugto.mx</p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <div class="px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700">
+                        Set: <span class="text-indigo-700 font-mono-code" id="exam-seed-display">V1</span>
+                    </div>
+                    <div id="infraction-counter-box" class="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800">
+                        Infracciones: <span id="infraction-count" class="font-bold">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PARTE 1 DE 3 -->
+            <article class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="bg-slate-50 px-5 py-3.5 border-b border-slate-200 flex items-center justify-between">
+                    <span id="q1-title" class="text-xs font-extrabold uppercase tracking-wider text-indigo-700">Parte 1 de 3 · Aplicación</span>
+                    <span class="text-xs font-semibold text-slate-600">33 pts</span>
+                </div>
+                <div class="p-5 sm:p-6 space-y-5">
+                    <p id="q1-text" class="text-sm sm:text-base text-slate-800 leading-relaxed font-medium">
+                        Cargando ejercicio 1...
+                    </p>
+                    <div class="bg-slate-50 rounded-xl border border-slate-200 p-3 sm:p-4 flex justify-center items-center overflow-hidden">
+                        <div id="q1-svg-container" class="w-full max-w-lg"></div>
+                    </div>
+                    <div class="space-y-2.5" id="q1-options" role="radiogroup" aria-label="Opciones Parte 1"></div>
+                </div>
+            </article>
+
+            <!-- PARTE 2 DE 3 -->
+            <article class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="bg-slate-50 px-5 py-3.5 border-b border-slate-200 flex items-center justify-between">
+                    <span id="q2-title" class="text-xs font-extrabold uppercase tracking-wider text-indigo-700">Parte 2 de 3 · Aplicación</span>
+                    <span class="text-xs font-semibold text-slate-600">33 pts</span>
+                </div>
+                <div class="p-5 sm:p-6 space-y-5">
+                    <p id="q2-text" class="text-sm sm:text-base text-slate-800 leading-relaxed font-medium">
+                        Cargando ejercicio 2...
+                    </p>
+                    <div class="bg-slate-50 rounded-xl border border-slate-200 p-3 sm:p-4 flex justify-center items-center overflow-hidden">
+                        <div id="q2-svg-container" class="w-full max-w-lg"></div>
+                    </div>
+                    <div class="space-y-2.5" id="q2-options" role="radiogroup" aria-label="Opciones Parte 2"></div>
+                </div>
+            </article>
+
+            <!-- PARTE 3 DE 3 -->
+            <article class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="bg-slate-50 px-5 py-3.5 border-b border-slate-200 flex items-center justify-between">
+                    <span id="q3-title" class="text-xs font-extrabold uppercase tracking-wider text-indigo-700">Parte 3 de 3 · Aplicación</span>
+                    <span class="text-xs font-semibold text-slate-600">34 pts</span>
+                </div>
+                <div class="p-5 sm:p-6 space-y-5">
+                    <p id="q3-text" class="text-sm sm:text-base text-slate-800 leading-relaxed font-medium">
+                        Cargando ejercicio 3...
+                    </p>
+                    <div class="bg-slate-50 rounded-xl border border-slate-200 p-3 sm:p-4 flex justify-center items-center overflow-hidden">
+                        <div id="q3-svg-container" class="w-full max-w-lg"></div>
+                    </div>
+                    <div class="space-y-2.5" id="q3-options" role="radiogroup" aria-label="Opciones Parte 3"></div>
+                </div>
+            </article>
+
+            <!-- Barra de Entrega -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div id="submit-warning" class="text-xs text-slate-500">
+                    Responde los <strong>3 ejercicios</strong> para habilitar la entrega. Al entregar no podrás revisar respuestas.
+                </div>
+                <button type="button" id="btn-submit-exam" disabled
+                    class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-bold text-sm shadow-md shadow-emerald-600/20 transition opacity-50 cursor-not-allowed">
+                    Finalizar y Entregar Examen
+                </button>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- VISTA 3: COMPROBANTE FINAL Y BITÁCORA DE INCIDENCIAS      -->
+        <!-- ========================================================= -->
+        <section id="view-receipt" class="hidden space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="bg-slate-900 px-6 py-6 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 mb-2">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            Evaluación Entregada · Revisión Deshabilitada
+                        </span>
+                        <h2 class="text-xl sm:text-2xl font-extrabold">Comprobante Oficial: Ley de los Senos</h2>
+                        <p class="text-xs text-slate-400 mt-1">Los reactivos y respuestas fueron eliminados de memoria por seguridad.</p>
+                    </div>
+                    <div class="bg-slate-800/90 border border-slate-700 rounded-xl px-5 py-3 text-center shrink-0">
+                        <span class="block text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Calificación</span>
+                        <span id="receipt-score" class="text-3xl font-extrabold text-white font-mono-code">0 / 100</span>
+                    </div>
+                </div>
+
+                <div class="p-6 space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                            <span class="block text-xs text-slate-500 font-medium">Sustentante</span>
+                            <span id="receipt-name" class="font-bold text-slate-900">—</span>
+                            <span id="receipt-email" class="block text-xs text-slate-600 mt-0.5">—</span>
+                        </div>
+                        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                            <span class="block text-xs text-slate-500 font-medium">Registro de Tiempo y Versión</span>
+                            <span class="block text-xs text-slate-700 mt-1">Inicio: <strong id="receipt-start">—</strong></span>
+                            <span class="block text-xs text-slate-700">Entrega: <strong id="receipt-end">—</strong></span>
+                            <span class="block text-xs text-indigo-700 font-semibold mt-0.5">Versión entregada: #<span id="receipt-version">1</span></span>
+                        </div>
+                    </div>
+
+                    <!-- Estado de Telemetría hacia Google Sheets -->
+                    <div id="sync-status-box" class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 flex flex-wrap items-center justify-between gap-2">
+                        <span id="sync-status-text">Sincronizando resultados con Google Sheets...</span>
+                        <button type="button" id="btn-retry-sync" class="hidden px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold cursor-pointer">
+                            Reintentar envío
+                        </button>
+                    </div>
+
+                    <!-- Bitácora de Incidencias -->
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Bitácora de Incidencias</h3>
+                            <span id="receipt-audit-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+                                0 incidencias
+                            </span>
+                        </div>
+
+                        <div id="receipt-clean-msg" class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs sm:text-sm">
+                            No se registraron salidas de pestaña, minimizados, recargas ni desconexiones durante la evaluación.
+                        </div>
+
+                        <div id="receipt-table-wrapper" class="hidden overflow-x-auto rounded-xl border border-slate-200">
+                            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                                <thead>
+                                    <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
+                                        <th class="py-2.5 px-3 font-bold">#</th>
+                                        <th class="py-2.5 px-3 font-bold">Fecha y Hora</th>
+                                        <th class="py-2.5 px-3 font-bold">Incidencia</th>
+                                        <th class="py-2.5 px-3 font-bold">Regeneración</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="receipt-incidents-body" class="divide-y divide-slate-200 bg-white"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Sello SHA-256 -->
+                    <div class="p-4 rounded-xl bg-slate-900 text-slate-200 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">Sello de Integridad SHA-256</span>
+                            <span class="text-[11px] text-slate-400">Web Crypto API</span>
+                        </div>
+                        <p id="receipt-hash" class="font-mono-code text-xs break-all text-emerald-300 bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+                            Generando firma SHA-256...
+                        </p>
+                    </div>
+
+                    <!-- Acciones -->
+                    <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                        <button type="button" id="btn-copy-receipt"
+                            class="flex-1 px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-sm transition flex items-center justify-center gap-2 cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
+                            </svg>
+                            <span>Copiar Comprobante</span>
+                        </button>
+                        <button type="button" id="btn-toggle-json"
+                            class="px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-sm border border-slate-300 transition cursor-pointer">
+                            Ver Payload JSON
+                        </button>
+                    </div>
+
+                    <div id="copy-feedback" class="hidden text-center text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 py-2 rounded-lg">
+                        Comprobante copiado al portapapeles.
+                    </div>
+
+                    <pre id="json-preview" class="hidden p-4 rounded-xl bg-slate-950 text-slate-300 font-mono-code text-xs overflow-x-auto border border-slate-800"></pre>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal de Alerta por Infracción y Regeneración -->
+    <div id="infraction-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border-2 border-red-500 alert-pulse space-y-4">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-xs font-extrabold uppercase tracking-wider text-red-600">Infracción Registrada</span>
+                    <h3 class="text-lg font-extrabold text-slate-900 leading-tight">Examen Regenerado</h3>
+                </div>
+            </div>
+
+            <p id="modal-infraction-reason" class="text-sm text-slate-700 leading-relaxed">
+                Se detectó una acción no permitida durante la evaluación.
+            </p>
+
+            <div class="p-3.5 rounded-xl bg-red-50 border border-red-200 text-xs text-red-900 space-y-1">
+                <p>• Tus 3 respuestas anteriores fueron eliminadas.</p>
+                <p>• Se seleccionaron <strong>3 nuevos escenarios</strong> para la <strong>Versión #<span id="modal-new-version">2</span></strong>.</p>
+                <p>• La infracción quedó grabada en tu bitácora y reportada.</p>
+            </div>
+
+            <button type="button" id="btn-close-modal"
+                class="w-full py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-sm transition cursor-pointer">
+                Continuar con los nuevos ejercicios
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de Acceso Docente -->
+    <div id="teacher-modal" class="hidden fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl border border-slate-200 space-y-4">
+            <h3 class="text-base font-extrabold text-slate-900">Acceso Docente · Reiniciar Dispositivo</h3>
+            <p class="text-xs text-slate-600">
+                Introduce el PIN docente para borrar el estado almacenado en este dispositivo y habilitar un nuevo inicio.
+            </p>
+            <input type="password" id="teacher-pin-input" maxlength="8" placeholder="PIN docente"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <p id="teacher-pin-error" class="hidden text-xs font-semibold text-red-600">PIN incorrecto.</p>
+            <div class="flex gap-2 pt-1">
+                <button type="button" id="btn-cancel-teacher" class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs cursor-pointer">
+                    Cancelar
+                </button>
+                <button type="button" id="btn-confirm-reset" class="flex-1 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs cursor-pointer">
+                    Reiniciar Dispositivo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pie de Página con Botón Acceso Docente -->
+    <footer class="bg-white border-t border-slate-200 py-4 px-4 mt-8">
+        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+            <span>Evaluación Aplicada: Ley de los Senos</span>
+            <button type="button" id="btn-open-teacher" class="text-slate-500 hover:text-slate-900 font-semibold underline transition cursor-pointer">
+                Acceso Docente
+            </button>
+        </div>
+    </footer>
+
+    <script>
+        // =========================================================================
+        // CONEXIÓN DIRECTA CON GOOGLE SHEETS (MISMA HOJA Y ESQUEMA)
+        // =========================================================================
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZmFL0tGKuf28yywVS9AOn3VODs0VunUmDH1WvewO0k35g2oNpLMAOy9p7NN1UQ_2-hw/exec";
+
+        (function () {
+            'use strict';
+
+            const STORAGE_KEY = 'ley_senos_seguro_estado_v1';
+            const TEACHER_PIN = '1701';
+            const INFRACTION_COOLDOWN_MS = 1200;
+
+            let lastInfractionTime = 0;
+
+            let state = {
+                status: 'register', // 'register' | 'active' | 'submitted'
+                studentName: '',
+                studentEmail: '',
+                startTime: null,
+                endTime: null,
+                version: 1,
+                seed: 0,
+                questions: null,
+                answers: { q1: null, q2: null, q3: null },
+                incidents: [],
+                pendingQueue: [],
+                score: 0,
+                integrityHash: '',
+                finalDelivered: false
+            };
+
+            const views = {
+                register: document.getElementById('view-register'),
+                exam: document.getElementById('view-exam'),
+                receipt: document.getElementById('view-receipt')
+            };
+
+            // ---------------------------------------------------------
+            // UTILIDADES MATEMÁTICAS Y GENERADOR DETERMINISTA
+            // ---------------------------------------------------------
+            function createSeededRandom(seed) {
+                let s = seed % 2147483647;
+                if (s <= 0) s += 2147483646;
+                return function () {
+                    s = (s * 16807) % 2147483647;
+                    return (s - 1) / 2147483646;
+                };
+            }
+
+            function randInt(rng, min, max) {
+                return Math.floor(rng() * (max - min + 1)) + min;
+            }
+
+            function shuffleArray(rng, arr) {
+                const copy = arr.slice();
+                for (let i = copy.length - 1; i > 0; i--) {
+                    const j = Math.floor(rng() * (i + 1));
+                    [copy[i], copy[j]] = [copy[j], copy[i]];
+                }
+                return copy;
+            }
+
+            function sinDeg(deg) {
+                return Math.sin((deg * Math.PI) / 180);
+            }
+
+            function round2(num) {
+                return Number(num.toFixed(2));
+            }
+
+            function formatNum(num) {
+                return Number.isInteger(num) ? String(num) : num.toFixed(2).replace(/\.00$/, '');
+            }
+
+            function formatDateTime(iso) {
+                if (!iso) return '—';
+                const d = new Date(iso);
+                return d.toLocaleString('es-MX', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            }
+
+            // ---------------------------------------------------------
+            // BANCO DE 15 ESCENARIOS APLICADOS DE LA LEY DE LOS SENOS
+            // ---------------------------------------------------------
+            const SINE_LAW_SCENARIOS = [
+                {
+                    id: 1,
+                    title: 'Navegación Marítima y Faro',
+                    unit: 'km',
+                    mode: 'AAS_THIRD', // Se dan ángulo en A, ángulo en C y lado c (AB) -> hallar lado b (AC)
+                    vA: 'Faro (A)', vB: 'Barco 1 (B)', vC: 'Barco 2 (C)',
+                    accent: '#0284c7',
+                    buildText: (L, angA, angB, angC) =>
+                        `Desde un faro costero (A) se observan dos embarcaciones en el mar en los puntos B y C. La distancia entre ambas embarcaciones es de ${L} km. El ángulo formado en el faro entre las visuales hacia ambos barcos es A = ${angA}°, y el ángulo medido desde la embarcación C entre el faro y el otro barco es C = ${angC}°. Aplicando la Ley de los Senos, determina la distancia (x) del faro a la embarcación B.`
+                },
+                {
+                    id: 2,
+                    title: 'Globo Aerostático y Dos Observadores',
+                    unit: 'm',
+                    mode: 'ASA_BASE', // Se dan ángulos A y B en la base c (AB) -> hallar lado b (AC)
+                    vA: 'Obs. A', vB: 'Obs. B', vC: 'Globo (C)',
+                    accent: '#dc2626',
+                    buildText: (L, angA, angB, angC) =>
+                        `Dos observadores situados en los puntos A y B sobre un terreno plano están separados por ${L} m y miran simultáneamente un globo aerostático en C. Los ángulos de elevación medidos son A = ${angA}° y B = ${angB}°. Calcula la distancia inclinada (x) desde el observador A hasta el globo aerostático.`
+                },
+                {
+                    id: 3,
+                    title: 'Longitud de Puente sobre un Cañón',
+                    unit: 'm',
+                    mode: 'AAS_THIRD',
+                    vA: 'Estribo A', vB: 'Estribo B', vC: 'Mirador C',
+                    accent: '#4f46e5',
+                    buildText: (L, angA, angB, angC) =>
+                        `Para proyectar un puente entre dos puntos A y B en bordes opuestos de un cañón, un topógrafo establece un punto de control C a ${L} m de B (lado BC = ${L} m). Si el ángulo en A mide A = ${angA}° y el ángulo en C mide C = ${angC}°, halla la longitud total (x) del puente AB.`
+                },
+                {
+                    id: 4,
+                    title: 'Telemetría de Dron entre Estaciones',
+                    unit: 'm',
+                    mode: 'ASA_BASE',
+                    vA: 'Base A', vB: 'Base B', vC: 'Dron (C)',
+                    accent: '#059669',
+                    buildText: (L, angA, angB, angC) =>
+                        `Dos estaciones de rastreo A y B separadas por ${L} m detectan un dron topográfico en el punto C. Los ángulos internos formados con la línea base AB son A = ${angA}° y B = ${angB}°. Determina la distancia (x) entre la estación A y el dron.`
+                },
+                {
+                    id: 5,
+                    title: 'Cable de Teleférico entre Cimas',
+                    unit: 'm',
+                    mode: 'AAS_THIRD',
+                    vA: 'Cima A', vB: 'Cima B', vC: 'Valle C',
+                    accent: '#7c3aed',
+                    buildText: (L, angA, angB, angC) =>
+                        `Se instalará un teleférico recto entre dos cimas A y B. Desde una estación en el valle C situada a ${L} m de la cima B, se miden los ángulos C = ${angC}° y A = ${angA}°. Calcula la longitud del cable tensor (x) entre las cimas A y B.`
+                },
+                {
+                    id: 6,
+                    title: 'Topografía de Terreno Triangular',
+                    unit: 'm',
+                    mode: 'ASA_BASE',
+                    vA: 'Vértice A', vB: 'Vértice B', vC: 'Vértice C',
+                    accent: '#d97706',
+                    buildText: (L, angA, angB, angC) =>
+                        `Un predio agrícola tiene forma de triángulo oblicuángulo ABC. El lindero frontal AB mide ${L} m y los ángulos interiores adyacentes a este lado son A = ${angA}° y B = ${angB}°. Calcula la longitud del lindero lateral AC (x).`
+                },
+                {
+                    id: 7,
+                    title: 'Triangulación de Señal entre Antenas',
+                    unit: 'km',
+                    mode: 'AAS_THIRD',
+                    vA: 'Antena A', vB: 'Antena B', vC: 'Repetidor C',
+                    accent: '#0891b2',
+                    buildText: (L, angA, angB, angC) =>
+                        `Una red de telecomunicaciones enlaza tres nodos A, B y C. La distancia entre la antena B y el repetidor C es de ${L} km. Si el ángulo en A es A = ${angA}° y el ángulo en C es C = ${angC}°, determina la distancia de enlace (x) entre A y B.`
+                },
+                {
+                    id: 8,
+                    title: 'Tirolesa en Parque Ecológico',
+                    unit: 'm',
+                    mode: 'ASA_BASE',
+                    vA: 'Torre A', vB: 'Torre B', vC: 'Anclaje C',
+                    accent: '#16a34a',
+                    buildText: (L, angA, angB, angC) =>
+                        `Entre dos plataformas A y B separadas por ${L} m y un punto de anclaje C se forma un triángulo de seguridad con ángulos A = ${angA}° y B = ${angB}°. Halla la distancia (x) desde la plataforma A hasta el anclaje C.`
+                },
+                {
+                    id: 9,
+                    title: 'Navegación Aérea y Desviación de Rumbo',
+                    unit: 'km',
+                    mode: 'AAS_THIRD',
+                    vA: 'Aerop. A', vB: 'Ciudad B', vC: 'Baliza C',
+                    accent: '#2563eb',
+                    buildText: (L, angA, angB, angC) =>
+                        `Una aeronave despega del aeropuerto A hacia la ciudad B. Una baliza de control C ubicada a ${L} km de B registra un ángulo C = ${angC}° entre el aeropuerto y la ciudad, mientras que en A el ángulo formado es A = ${angA}°. Calcula la distancia de vuelo directo (x) de A a B.`
+                },
+                {
+                    id: 10,
+                    title: 'Grúa Torre y Tensor de Pluma',
+                    unit: 'm',
+                    mode: 'ASA_BASE',
+                    vA: 'Mástil A', vB: 'Punta B', vC: 'Ancla C',
+                    accent: '#ea580c',
+                    buildText: (L, angA, angB, angC) =>
+                        `En la estructura superior de una grúa, la pluma horizontal AB mide ${L} m. Un tirante une el extremo B con un contrapeso en C formando ángulos internos A = ${angA}° y B = ${angB}°. Determina la longitud (x) del segmento AC.`
+                },
+                {
+                    id: 11,
+                    title: 'Distancia a una Isla desde la Playa',
+                    unit: 'm',
+                    mode: 'ASA_BASE',
+                    vA: 'Muelle A', vB: 'Playa B', vC: 'Isla (C)',
+                    accent: '#0d9488',
+                    buildText: (L, angA, angB, angC) =>
+                        `Para medir la distancia a una isla C sin cruzar el canal, se marcan dos puntos A y B en la costa separados por ${L} m. Con un teodolito se obtienen los ángulos A = ${angA}° y B = ${angB}°. Calcula la distancia (x) desde el muelle A hasta la isla C.`
+                },
+                {
+                    id: 12,
+                    title: 'Cableado Eléctrico en Terreno Inclinado',
+                    unit: 'm',
+                    mode: 'AAS_THIRD',
+                    vA: 'Poste A', vB: 'Poste B', vC: 'Subest. C',
+                    accent: '#6366f1',
+                    buildText: (L, angA, angB, angC) =>
+                        `Se tenderá una línea aérea entre los postes A y B. Desde una subestación C situada a ${L} m del poste B, se miden los ángulos C = ${angC}° y A = ${angA}°. Halla la longitud del tramo de cable (x) entre A y B.`
+                },
+                {
+                    id: 13,
+                    title: 'Rastreo Satelital de Órbita Baja',
+                    unit: 'km',
+                    mode: 'ASA_BASE',
+                    vA: 'Radar A', vB: 'Radar B', vC: 'Satélite C',
+                    accent: '#9333ea',
+                    buildText: (L, angA, angB, angC) =>
+                        `Dos radares terrestres A y B separados por ${L} km rastrean simultáneamente un nanosatélite en C con ángulos A = ${angA}° y B = ${angB}°. Calcula la distancia (x) del radar A al satélite C.`
+                },
+                {
+                    id: 14,
+                    title: 'Rescate en Montaña desde Dos Campamentos',
+                    unit: 'm',
+                    mode: 'ASA_BASE',
+                    vA: 'Camp. A', vB: 'Camp. B', vC: 'Refugio C',
+                    accent: '#e11d48',
+                    buildText: (L, angA, angB, angC) =>
+                        `Dos brigadas de rescate en los campamentos A y B, distantes ${L} m entre sí, ubican un refugio C en la ladera con ángulos visuales A = ${angA}° y B = ${angB}°. Determina la distancia (x) que debe recorrer la brigada A hasta el refugio C.`
+                },
+                {
+                    id: 15,
+                    title: 'Armadura Metálica de Cubierta Industrial',
+                    unit: 'm',
+                    mode: 'AAS_THIRD',
+                    vA: 'Nodo A', vB: 'Nodo B', vC: 'Nodo C',
+                    accent: '#475569',
+                    buildText: (L, angA, angB, angC) =>
+                        `En una cercha metálica triangular ABC, la barra BC tiene una longitud de ${L} m. Los ángulos estructurales en los nodos A y C son A = ${angA}° y C = ${angC}°. Calcula la longitud de la barra principal AB (x).`
+                }
+            ];
+
+            // Construye SVG dinámico para triángulo oblicuángulo ABC con incógnita x en AC (lado b) o AB (lado c)
+            function buildSineLawSVG(scenario, params) {
+                const { L, angA, angB, angC, targetSide } = params;
+                // targetSide === 'AC' (lado b, entre A y C) o 'AB' (lado c, entre A y B)
+                const labelAB = targetSide === 'AB' ? `x = ?` : `${L} ${scenario.unit}`;
+                const colorAB = targetSide === 'AB' ? '#dc2626' : '#0f172a';
+                const bgAB = targetSide === 'AB' ? '#fef2f2' : '#ffffff';
+                const strokeAB = targetSide === 'AB' ? '#fca5a5' : '#cbd5e1';
+
+                const labelBC = targetSide === 'AB' ? `${L} ${scenario.unit}` : 'Lado a';
+                const showBC = targetSide === 'AB';
+
+                const labelAC = targetSide === 'AC' ? `x = ?` : 'Lado b';
+                const showAC = targetSide === 'AC';
+
+                const showAngA = true;
+                const showAngB = scenario.mode === 'ASA_BASE';
+                const showAngC = scenario.mode === 'AAS_THIRD';
+
+                return `
+                <svg viewBox="0 0 460 235" class="w-full h-auto max-h-60" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="0" y="0" width="460" height="235" rx="12" fill="#f8fafc"/>
+
+                    <!-- Triángulo Oblicuángulo ABC: A(75,185), B(385,185), C(255,48) -->
+                    <polygon points="75,185 385,185 255,48" fill="${scenario.accent}" fill-opacity="0.09" stroke="${scenario.accent}" stroke-width="2.6" stroke-linejoin="round"/>
+
+                    <!-- Arcos de ángulos -->
+                    <path d="M 108,185 A 33,33 0 0,0 99,161" fill="none" stroke="#4f46e5" stroke-width="2"/>
+                    ${showAngB ? `<path d="M 352,185 A 33,33 0 0,1 362,161" fill="none" stroke="#4f46e5" stroke-width="2"/>` : ''}
+                    ${showAngC ? `<path d="M 236,68 A 28,28 0 0,0 274,68" fill="none" stroke="#4f46e5" stroke-width="2"/>` : ''}
+
+                    <!-- Etiquetas de ángulos internos -->
+                    ${showAngA ? `<text x="115" y="174" font-family="Inter, sans-serif" font-size="12" font-weight="800" fill="#312e81">A = ${angA}°</text>` : ''}
+                    ${showAngB ? `<text x="346" y="174" text-anchor="end" font-family="Inter, sans-serif" font-size="12" font-weight="800" fill="#312e81">B = ${angB}°</text>` : ''}
+                    ${showAngC ? `<text x="255" y="86" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="800" fill="#312e81">C = ${angC}°</text>` : ''}
+
+                    <!-- Vértices -->
+                    <circle cx="75" cy="185" r="5" fill="#1e293b"/>
+                    <text x="65" y="205" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#1e293b">${scenario.vA}</text>
+
+                    <circle cx="385" cy="185" r="5" fill="#1e293b"/>
+                    <text x="395" y="205" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#1e293b">${scenario.vB}</text>
+
+                    <circle cx="255" cy="48" r="5" fill="#1e293b"/>
+                    <text x="255" y="34" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#1e293b">${scenario.vC}</text>
+
+                    <!-- Etiqueta Lado Base AB -->
+                    <rect x="188" y="193" width="84" height="23" rx="6" fill="${bgAB}" stroke="${strokeAB}"/>
+                    <text x="230" y="209" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="800" fill="${colorAB}">${labelAB}</text>
+
+                    <!-- Etiqueta Lado Izquierdo AC (cuando es incógnita x) -->
+                    ${showAC ? `
+                    <rect x="92" y="98" width="74" height="24" rx="6" fill="#fef2f2" stroke="#fca5a5"/>
+                    <text x="129" y="114" text-anchor="middle" font-family="Inter, sans-serif" font-size="13" font-weight="800" fill="#dc2626">${labelAC}</text>
+                    ` : ''}
+
+                    <!-- Etiqueta Lado Derecho BC (cuando es dato conocido L) -->
+                    ${showBC ? `
+                    <rect x="316" y="98" width="82" height="24" rx="6" fill="#ffffff" stroke="#cbd5e1"/>
+                    <text x="357" y="114" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#0f172a">${labelBC}</text>
+                    ` : ''}
+                </svg>`;
+            }
+
+            function buildSingleSineQuestion(rng, scenario) {
+                // Generar ángulos válidos para triángulo oblicuángulo (suma = 180°, todos >= 25°)
+                const angA = randInt(rng, 28, 68);
+                const angB = randInt(rng, 32, 78);
+                const angC = 180 - angA - angB;
+
+                let L, correctVal, d1, d2, d3, targetSide;
+
+                if (scenario.mode === 'ASA_BASE') {
+                    // Base AB = L (lado c), ángulos A y B conocidos -> hallar lado AC (b)
+                    // b / sin(B) = c / sin(C)  =>  x = L * sin(B) / sin(C)
+                    L = randInt(rng, 45, 240);
+                    targetSide = 'AC';
+                    correctVal = round2((L * sinDeg(angB)) / sinDeg(angC));
+
+                    // Distractores plausibles (errores comunes de trigonometría)
+                    d1 = round2((L * sinDeg(angA)) / sinDeg(angC)); // Usar sin(A) en vez de sin(B)
+                    d2 = round2((L * sinDeg(angC)) / sinDeg(angB)); // Invertir la proporción
+                    d3 = round2((L * sinDeg(angB)) / sinDeg(angA)); // Dividir entre sin(A) en vez de sin(C)
+                } else {
+                    // Lado BC = L (lado a), ángulos A y C conocidos -> hallar lado AB (c)
+                    // c / sin(C) = a / sin(A)  =>  x = L * sin(C) / sin(A)
+                    L = randInt(rng, 50, 260);
+                    targetSide = 'AB';
+                    correctVal = round2((L * sinDeg(angC)) / sinDeg(angA));
+
+                    d1 = round2((L * sinDeg(angA)) / sinDeg(angC)); // Invertir razón
+                    d2 = round2((L * sinDeg(angB)) / sinDeg(angA)); // Usar ángulo B
+                    d3 = round2((L * sinDeg(angC)) / sinDeg(angB)); // Dividir entre sin(B)
+                }
+
+                const rawOptions = [
+                    { val: correctVal, isCorrect: true },
+                    { val: d1, isCorrect: false },
+                    { val: d2, isCorrect: false },
+                    { val: d3, isCorrect: false }
+                ];
+
+                const used = new Set();
+                const uniqueOptions = rawOptions.map((opt, idx) => {
+                    let v = opt.val;
+                    while (!Number.isFinite(v) || v <= 0 || used.has(v)) {
+                        v = round2(correctVal + (idx + 1) * 7.35);
+                    }
+                    used.add(v);
+                    return {
+                        label: `${formatNum(v)} ${scenario.unit}`,
+                        isCorrect: opt.isCorrect
+                    };
+                });
+
+                const shuffled = shuffleArray(rng, uniqueOptions);
+
+                return {
+                    scenarioId: scenario.id,
+                    title: scenario.title,
+                    text: scenario.buildText(L, angA, angB, angC),
+                    svg: buildSineLawSVG(scenario, { L, angA, angB, angC, targetSide }),
+                    options: shuffled.map(o => o.label),
+                    correctIndex: shuffled.findIndex(o => o.isCorrect)
+                };
+            }
+
+            // Selecciona 3 escenarios distintos sin repetir de los 15 disponibles
+            function generateThreeDistinctQuestions(seed) {
+                const rng = createSeededRandom(seed);
+                const shuffledScenarios = shuffleArray(rng, SINE_LAW_SCENARIOS);
+                const chosenThree = shuffledScenarios.slice(0, 3);
+
+                return {
+                    q1: buildSingleSineQuestion(rng, chosenThree[0]),
+                    q2: buildSingleSineQuestion(rng, chosenThree[1]),
+                    q3: buildSingleSineQuestion(rng, chosenThree[2])
+                };
+            }
+
+            // ---------------------------------------------------------
+            // PERSISTENCIA Y SELLO CRIPTOGRÁFICO SHA-256
+            // ---------------------------------------------------------
+            function persistState() {
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                } catch (err) {
+                    console.error('Error guardando estado en localStorage:', err);
+                }
+            }
+
+            function restoreState() {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    if (raw) {
+                        const parsed = JSON.parse(raw);
+                        if (parsed && parsed.status) {
+                            state = Object.assign({}, state, parsed);
+                            if (!Array.isArray(state.incidents)) state.incidents = [];
+                            if (!Array.isArray(state.pendingQueue)) state.pendingQueue = [];
+                            if (!state.answers) state.answers = { q1: null, q2: null, q3: null };
+                        }
+                    }
+                } catch (err) {
+                    console.error('Error leyendo estado de localStorage:', err);
+                }
+            }
+
+            async function generateSHA256Seal(payloadText) {
+                try {
+                    if (window.crypto && window.crypto.subtle) {
+                        const encoder = new TextEncoder();
+                        const data = encoder.encode(payloadText);
+                        const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
+                        return Array.from(new Uint8Array(hashBuffer))
+                            .map(b => b.toString(16).padStart(2, '0'))
+                            .join('')
+                            .toUpperCase();
+                    }
+                } catch (err) {
+                    console.error('Web Crypto API no disponible:', err);
+                }
+                return 'SHA256-UNAVAILABLE';
+            }
+
+            // ---------------------------------------------------------
+            // TELEMETRÍA A GOOGLE SHEETS CON COLA DE REINTENTO OFFLINE
+            // ---------------------------------------------------------
+            function updateSyncStatus(msg, canRetry) {
+                const textEl = document.getElementById('sync-status-text');
+                const retryEl = document.getElementById('btn-retry-sync');
+                if (textEl) textEl.textContent = msg;
+                if (retryEl) {
+                    if (canRetry) retryEl.classList.remove('hidden');
+                    else retryEl.classList.add('hidden');
+                }
+            }
+
+            async function dispatchTelemetry(payload, isFinalSubmission) {
+                if (!navigator.onLine) {
+                    state.pendingQueue.push(payload);
+                    persistState();
+                    updateSyncStatus('Sin conexión: envío guardado en cola para sincronizar al reconectar.', true);
+                    return false;
+                }
+
+                try {
+                    await fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (isFinalSubmission) {
+                        state.finalDelivered = true;
+                        persistState();
+                    }
+                    updateSyncStatus('Resultados y bitácora enviados a Google Sheets correctamente.', false);
+                    return true;
+                } catch (err) {
+                    state.pendingQueue.push(payload);
+                    persistState();
+                    updateSyncStatus('Error temporal de red: envío guardado en cola para reintento.', true);
+                    return false;
+                }
+            }
+
+            async function flushPendingQueue() {
+                if (!navigator.onLine) return;
+
+                if (state.pendingQueue.length > 0) {
+                    const queueCopy = state.pendingQueue.slice();
+                    const stillPending = [];
+
+                    for (const item of queueCopy) {
+                        try {
+                            await fetch(GOOGLE_SCRIPT_URL, {
+                                method: 'POST',
+                                mode: 'no-cors',
+                                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                                body: JSON.stringify(item)
+                            });
+                        } catch (err) {
+                            stillPending.push(item);
+                        }
+                    }
+
+                    state.pendingQueue = stillPending;
+                    persistState();
+                }
+
+                if (state.status === 'submitted' && !state.finalDelivered && state.pendingQueue.length === 0) {
+                    await dispatchTelemetry({
+                        nombre: state.studentName,
+                        correo: state.studentEmail,
+                        tipoEvento: 'ENTREGA_FINAL',
+                        detalle: `Ley de los Senos · Entrega final Versión #${state.version}`,
+                        totalInfracciones: state.incidents.length,
+                        calificacion: `${state.score} / 100`,
+                        bitacoraCompleta: JSON.stringify(state.incidents),
+                        sello: state.integrityHash
+                    }, true);
+                } else if (state.status === 'submitted' && state.finalDelivered && state.pendingQueue.length === 0) {
+                    updateSyncStatus('Entrega y bitácora sincronizadas con Google Sheets.', false);
+                }
+            }
+
+            // ---------------------------------------------------------
+            // DETECCIÓN DE INFRACCIONES Y REGENERACIÓN DE 3 EJERCICIOS
+            // ---------------------------------------------------------
+            function registerInfraction(reason, showModalPopup) {
+                if (state.status !== 'active') return;
+
+                const now = Date.now();
+                if (now - lastInfractionTime < INFRACTION_COOLDOWN_MS) {
+                    return;
+                }
+                lastInfractionTime = now;
+
+                state.version += 1;
+                state.seed = Math.floor(now % 1000000) + state.version * 7919;
+                state.questions = generateThreeDistinctQuestions(state.seed);
+                state.answers = { q1: null, q2: null, q3: null };
+
+                const incident = {
+                    number: state.incidents.length + 1,
+                    timestamp: new Date().toISOString(),
+                    reason: reason,
+                    regeneratedVersion: state.version
+                };
+                state.incidents.push(incident);
+                persistState();
+                renderExamView();
+
+                // Mostrar banner rojo persistente de advertencia
+                const banner = document.getElementById('infraction-banner');
+                const bannerText = document.getElementById('infraction-banner-text');
+                bannerText.textContent = `Infracción #${incident.number} (${reason}). El examen cambió a Versión #${state.version} con 3 ejercicios nuevos.`;
+                banner.classList.remove('hidden');
+
+                dispatchTelemetry({
+                    nombre: state.studentName,
+                    correo: state.studentEmail,
+                    tipoEvento: 'INFRACCION',
+                    detalle: `Ley de los Senos · ${reason} -> Nueva versión #${state.version}`,
+                    totalInfracciones: state.incidents.length,
+                    calificacion: 'En curso',
+                    bitacoraCompleta: JSON.stringify(state.incidents),
+                    sello: ''
+                }, false);
+
+                if (showModalPopup) {
+                    document.getElementById('modal-infraction-reason').textContent =
+                        `Motivo registrado: ${reason}.`;
+                    document.getElementById('modal-new-version').textContent = state.version;
+                    document.getElementById('infraction-modal').classList.remove('hidden');
+                }
+            }
+
+            function syncConnectionUI() {
+                const online = navigator.onLine;
+                const badge = document.getElementById('network-badge');
+                const dot = document.getElementById('network-dot');
+                const text = document.getElementById('network-text');
+                const overlay = document.getElementById('offline-overlay');
+
+                if (online) {
+                    badge.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-950/80 text-emerald-300 border border-emerald-700/60';
+                    dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+                    text.textContent = 'En línea';
+                    overlay.classList.add('hidden');
+                    updateSubmitButtonState();
+                    flushPendingQueue();
+                } else {
+                    badge.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-950 text-red-200 border border-red-700';
+                    dot.className = 'w-2 h-2 rounded-full bg-red-400 animate-ping';
+                    text.textContent = 'Sin conexión';
+                    if (state.status === 'active') {
+                        overlay.classList.remove('hidden');
+                    }
+                    updateSubmitButtonState();
+                }
+            }
+
+            // Listeners de supervisión
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden && state.status === 'active') {
+                    registerInfraction('Cambio de pestaña o minimizado de ventana (visibilitychange)', true);
+                }
+            });
+
+            window.addEventListener('offline', () => {
+                syncConnectionUI();
+                if (state.status === 'active') {
+                    registerInfraction('Desconexión de internet durante el examen (offline)', false);
+                }
+            });
+
+            window.addEventListener('online', () => {
+                syncConnectionUI();
+            });
+
+            document.addEventListener('contextmenu', (e) => {
+                if (state.status === 'active') e.preventDefault();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (state.status === 'active') {
+                    if ((e.ctrlKey || e.metaKey) && ['c', 'u', 's', 'p', 'i'].includes(e.key.toLowerCase())) {
+                        e.preventDefault();
+                    }
+                    if (e.key === 'F12') e.preventDefault();
+                }
+            });
+
+            // ---------------------------------------------------------
+            // RENDERIZADO DE INTERFAZ Y OPCIONES
+            // ---------------------------------------------------------
+            function showView(name) {
+                Object.keys(views).forEach(key => {
+                    if (key === name) views[key].classList.remove('hidden');
+                    else views[key].classList.add('hidden');
+                });
+
+                const badge = document.getElementById('exam-status-badge');
+                if (name === 'active') {
+                    badge.classList.remove('hidden');
+                    badge.classList.add('flex');
+                } else {
+                    badge.classList.add('hidden');
+                    badge.classList.remove('flex');
+                }
+            }
+
+            function updateSubmitButtonState() {
+                const btnSubmit = document.getElementById('btn-submit-exam');
+                if (!btnSubmit) return;
+
+                const allAnswered =
+                    state.answers.q1 !== null &&
+                    state.answers.q2 !== null &&
+                    state.answers.q3 !== null;
+                const canSubmit = allAnswered && navigator.onLine;
+
+                btnSubmit.disabled = !canSubmit;
+                if (canSubmit) {
+                    btnSubmit.classList.remove('opacity-50', 'cursor-not-allowed');
+                    btnSubmit.classList.add('cursor-pointer');
+                } else {
+                    btnSubmit.classList.add('opacity-50', 'cursor-not-allowed');
+                    btnSubmit.classList.remove('cursor-pointer');
+                }
+            }
+
+            function renderOptions(containerId, qKey, options, selectedIdx) {
+                const container = document.getElementById(containerId);
+                container.innerHTML = '';
+                const letters = ['A', 'B', 'C', 'D'];
+
+                options.forEach((label, idx) => {
+                    const chosen = selectedIdx === idx;
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = `w-full text-left p-3.5 sm:p-4 rounded-xl border-2 transition flex items-center gap-3 cursor-pointer ${
+                        chosen
+                            ? 'border-indigo-600 bg-indigo-50/70 text-indigo-950 shadow-sm'
+                            : 'border-slate-200 hover:border-slate-300 bg-white text-slate-800'
+                    }`;
+
+                    btn.innerHTML = `
+                        <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-extrabold shrink-0 ${
+                            chosen ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'
+                        }">${letters[idx]}</span>
+                        <span class="text-sm sm:text-base font-semibold">${label}</span>
+                    `;
+
+                    btn.addEventListener('click', () => {
+                        state.answers[qKey] = idx;
+                        persistState();
+                        renderOptions(containerId, qKey, options, idx);
+                        updateSubmitButtonState();
+                    });
+
+                    container.appendChild(btn);
+                });
+            }
+
+            function renderExamView() {
+                showView('exam');
+
+                document.getElementById('exam-student-display').textContent = state.studentName;
+                document.getElementById('exam-email-display').textContent = state.studentEmail;
+                document.getElementById('header-version').textContent = state.version;
+                document.getElementById('exam-seed-display').textContent = `V${state.version}-${String(state.seed).slice(-4)}`;
+
+                const countEl = document.getElementById('infraction-count');
+                const boxEl = document.getElementById('infraction-counter-box');
+                countEl.textContent = state.incidents.length;
+
+                if (state.incidents.length > 0) {
+                    boxEl.className = 'px-3 py-1.5 rounded-xl bg-red-50 border border-red-200 text-xs font-semibold text-red-800';
+                } else {
+                    boxEl.className = 'px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800';
+                }
+
+                // Parte 1
+                document.getElementById('q1-title').textContent = `Parte 1 de 3 · ${state.questions.q1.title}`;
+                document.getElementById('q1-text').textContent = state.questions.q1.text;
+                document.getElementById('q1-svg-container').innerHTML = state.questions.q1.svg;
+                renderOptions('q1-options', 'q1', state.questions.q1.options, state.answers.q1);
+
+                // Parte 2
+                document.getElementById('q2-title').textContent = `Parte 2 de 3 · ${state.questions.q2.title}`;
+                document.getElementById('q2-text').textContent = state.questions.q2.text;
+                document.getElementById('q2-svg-container').innerHTML = state.questions.q2.svg;
+                renderOptions('q2-options', 'q2', state.questions.q2.options, state.answers.q2);
+
+                // Parte 3
+                document.getElementById('q3-title').textContent = `Parte 3 de 3 · ${state.questions.q3.title}`;
+                document.getElementById('q3-text').textContent = state.questions.q3.text;
+                document.getElementById('q3-svg-container').innerHTML = state.questions.q3.svg;
+                renderOptions('q3-options', 'q3', state.questions.q3.options, state.answers.q3);
+
+                syncConnectionUI();
+            }
+
+            async function renderReceiptView() {
+                showView('receipt');
+                document.getElementById('offline-overlay').classList.add('hidden');
+                document.getElementById('infraction-banner').classList.add('hidden');
+
+                document.getElementById('receipt-score').textContent = `${state.score} / 100`;
+                document.getElementById('receipt-name').textContent = state.studentName;
+                document.getElementById('receipt-email').textContent = state.studentEmail;
+                document.getElementById('receipt-start').textContent = formatDateTime(state.startTime);
+                document.getElementById('receipt-end').textContent = formatDateTime(state.endTime);
+                document.getElementById('receipt-version').textContent = state.version;
+
+                const badge = document.getElementById('receipt-audit-badge');
+                const cleanMsg = document.getElementById('receipt-clean-msg');
+                const tableWrap = document.getElementById('receipt-table-wrapper');
+                const tbody = document.getElementById('receipt-incidents-body');
+
+                if (state.incidents.length === 0) {
+                    badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800';
+                    badge.textContent = '0 incidencias';
+                    cleanMsg.classList.remove('hidden');
+                    tableWrap.classList.add('hidden');
+                } else {
+                    badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800';
+                    badge.textContent = `${state.incidents.length} incidencia(s)`;
+                    cleanMsg.classList.add('hidden');
+                    tableWrap.classList.remove('hidden');
+
+                    tbody.innerHTML = '';
+                    state.incidents.forEach((inc) => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td class="py-2.5 px-3 font-bold text-slate-700">${inc.number}</td>
+                            <td class="py-2.5 px-3 font-mono-code text-xs text-slate-600">${formatDateTime(inc.timestamp)}</td>
+                            <td class="py-2.5 px-3 font-semibold text-red-700">${inc.reason}</td>
+                            <td class="py-2.5 px-3 text-slate-600">Versión #${inc.regeneratedVersion}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+
+                if (!state.integrityHash) {
+                    const canonicalPayload = JSON.stringify({
+                        evaluacion: 'Ley de los Senos',
+                        studentName: state.studentName,
+                        studentEmail: state.studentEmail,
+                        startTime: state.startTime,
+                        endTime: state.endTime,
+                        version: state.version,
+                        score: state.score,
+                        incidents: state.incidents
+                    });
+                    state.integrityHash = await generateSHA256Seal(canonicalPayload);
+                    persistState();
+                }
+
+                document.getElementById('receipt-hash').textContent = state.integrityHash;
+
+                const exportPayload = {
+                    nombre: state.studentName,
+                    correo: state.studentEmail,
+                    tipoEvento: 'ENTREGA_FINAL',
+                    detalle: `Ley de los Senos · Entrega final Versión #${state.version}`,
+                    totalInfracciones: state.incidents.length,
+                    calificacion: `${state.score} / 100`,
+                    bitacoraCompleta: state.incidents,
+                    sello: state.integrityHash
+                };
+                document.getElementById('json-preview').textContent = JSON.stringify(exportPayload, null, 2);
+
+                if (state.finalDelivered && state.pendingQueue.length === 0) {
+                    updateSyncStatus('Entrega y bitácora enviadas a Google Sheets.', false);
+                } else {
+                    updateSyncStatus('Envío pendiente a Google Sheets.', true);
+                }
+            }
+
+            // ---------------------------------------------------------
+            // EVENTOS DE FORMULARIO, ENTREGA Y ACCESO DOCENTE
+            // ---------------------------------------------------------
+            document.getElementById('register-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const nameVal = document.getElementById('student-name').value.trim();
+                const emailVal = document.getElementById('student-email').value.trim().toLowerCase();
+                const errBox = document.getElementById('register-error');
+
+                if (nameVal.length < 5 || nameVal.split(/\s+/).length < 2) {
+                    errBox.textContent = 'Ingresa tu nombre completo (al menos nombre y apellido).';
+                    errBox.classList.remove('hidden');
+                    return;
+                }
+
+                const ugtoRegex = /^[a-z0-9._%+-]+@ugto\.mx$/;
+                if (!ugtoRegex.test(emailVal)) {
+                    errBox.textContent = 'El correo institucional debe terminar estrictamente en @ugto.mx.';
+                    errBox.classList.remove('hidden');
+                    return;
+                }
+
+                if (!navigator.onLine) {
+                    errBox.textContent = 'Necesitas conexión a internet activa para comenzar la evaluación.';
+                    errBox.classList.remove('hidden');
+                    return;
+                }
+
+                errBox.classList.add('hidden');
+
+                const initialSeed = Math.floor(Date.now() % 1000000) + 307;
+                state = {
+                    status: 'active',
+                    studentName: nameVal,
+                    studentEmail: emailVal,
+                    startTime: new Date().toISOString(),
+                    endTime: null,
+                    version: 1,
+                    seed: initialSeed,
+                    questions: generateThreeDistinctQuestions(initialSeed),
+                    answers: { q1: null, q2: null, q3: null },
+                    incidents: [],
+                    pendingQueue: [],
+                    score: 0,
+                    integrityHash: '',
+                    finalDelivered: false
+                };
+
+                persistState();
+                renderExamView();
+
+                dispatchTelemetry({
+                    nombre: state.studentName,
+                    correo: state.studentEmail,
+                    tipoEvento: 'INICIO',
+                    detalle: 'Ley de los Senos · Inicio de evaluación Versión #1',
+                    totalInfracciones: 0,
+                    calificacion: 'En curso',
+                    bitacoraCompleta: '[]',
+                    sello: ''
+                }, false);
+            });
+
+            document.getElementById('btn-submit-exam').addEventListener('click', async () => {
+                if (!navigator.onLine) {
+                    syncConnectionUI();
+                    return;
+                }
+
+                const warnEl = document.getElementById('submit-warning');
+                if (state.answers.q1 === null || state.answers.q2 === null || state.answers.q3 === null) {
+                    warnEl.innerHTML = '<span class="text-red-600 font-bold">Debes seleccionar una respuesta en las 3 partes antes de entregar.</span>';
+                    return;
+                }
+
+                // Calificación sobre 100 puntos (33 + 33 + 34 = 100)
+                let totalScore = 0;
+                if (state.answers.q1 === state.questions.q1.correctIndex) totalScore += 33;
+                if (state.answers.q2 === state.questions.q2.correctIndex) totalScore += 33;
+                if (state.answers.q3 === state.questions.q3.correctIndex) totalScore += 34;
+
+                // Eliminar preguntas y respuestas de la memoria y almacenamiento local
+                state.questions = null;
+                state.answers = { q1: null, q2: null, q3: null };
+                state.score = totalScore;
+                state.endTime = new Date().toISOString();
+                state.status = 'submitted';
+
+                const canonicalPayload = JSON.stringify({
+                    evaluacion: 'Ley de los Senos',
+                    studentName: state.studentName,
+                    studentEmail: state.studentEmail,
+                    startTime: state.startTime,
+                    endTime: state.endTime,
+                    version: state.version,
+                    score: state.score,
+                    incidents: state.incidents
+                });
+                state.integrityHash = await generateSHA256Seal(canonicalPayload);
+                persistState();
+
+                await renderReceiptView();
+
+                await dispatchTelemetry({
+                    nombre: state.studentName,
+                    correo: state.studentEmail,
+                    tipoEvento: 'ENTREGA_FINAL',
+                    detalle: `Ley de los Senos · Entrega final Versión #${state.version}`,
+                    totalInfracciones: state.incidents.length,
+                    calificacion: `${state.score} / 100`,
+                    bitacoraCompleta: JSON.stringify(state.incidents),
+                    sello: state.integrityHash
+                }, true);
+            });
+
+            document.getElementById('btn-retry-sync').addEventListener('click', async () => {
+                await flushPendingQueue();
+            });
+
+            document.getElementById('btn-close-modal').addEventListener('click', () => {
+                document.getElementById('infraction-modal').classList.add('hidden');
+            });
+
+            document.getElementById('btn-dismiss-banner').addEventListener('click', () => {
+                document.getElementById('infraction-banner').classList.add('hidden');
+            });
+
+            document.getElementById('btn-copy-receipt').addEventListener('click', () => {
+                const incSummary = state.incidents.length === 0
+                    ? '0 incidencias'
+                    : state.incidents.map(i => `#${i.number} [${formatDateTime(i.timestamp)}] ${i.reason}`).join(' | ');
+
+                const summaryText = [
+                    '=== COMPROBANTE DE EVALUACIÓN: LEY DE LOS SENOS ===',
+                    `Sustentante: ${state.studentName}`,
+                    `Correo: ${state.studentEmail}`,
+                    `Inicio: ${formatDateTime(state.startTime)}`,
+                    `Entrega: ${formatDateTime(state.endTime)}`,
+                    `Versión entregada: #${state.version}`,
+                    `Calificación: ${state.score} / 100`,
+                    `Incidencias: ${state.incidents.length} (${incSummary})`,
+                    `Sello SHA-256: ${state.integrityHash}`
+                ].join('\n');
+
+                const ta = document.createElement('textarea');
+                ta.value = summaryText;
+                document.body.appendChild(ta);
+                ta.select();
+                try {
+                    document.execCommand('copy');
+                    const fb = document.getElementById('copy-feedback');
+                    fb.classList.remove('hidden');
+                    setTimeout(() => fb.classList.add('hidden'), 3500);
+                } catch (err) {
+                    console.error('No se pudo copiar:', err);
+                }
+                document.body.removeChild(ta);
+            });
+
+            document.getElementById('btn-toggle-json').addEventListener('click', () => {
+                document.getElementById('json-preview').classList.toggle('hidden');
+            });
+
+            // Acceso Docente con PIN 1701
+            document.getElementById('btn-open-teacher').addEventListener('click', () => {
+                document.getElementById('teacher-pin-input').value = '';
+                document.getElementById('teacher-pin-error').classList.add('hidden');
+                document.getElementById('teacher-modal').classList.remove('hidden');
+            });
+
+            document.getElementById('btn-cancel-teacher').addEventListener('click', () => {
+                document.getElementById('teacher-modal').classList.add('hidden');
+            });
+
+            document.getElementById('btn-confirm-reset').addEventListener('click', () => {
+                const pinVal = document.getElementById('teacher-pin-input').value.trim();
+                if (pinVal === TEACHER_PIN) {
+                    localStorage.removeItem(STORAGE_KEY);
+                    location.reload();
+                } else {
+                    document.getElementById('teacher-pin-error').classList.remove('hidden');
+                }
+            });
+
+            // ---------------------------------------------------------
+            // INICIALIZACIÓN Y DETECCIÓN DE RECARGA DURANTE EL EXAMEN
+            // ---------------------------------------------------------
+            window.addEventListener('load', async () => {
+                restoreState();
+                syncConnectionUI();
+
+                if (state.status === 'active') {
+                    registerInfraction('Recarga de página durante el examen activo', true);
+                } else if (state.status === 'submitted') {
+                    await renderReceiptView();
+                    await flushPendingQueue();
+                } else {
+                    showView('register');
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
